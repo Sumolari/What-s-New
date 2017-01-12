@@ -108,12 +108,70 @@ static NSString * const MTZWhatsNewLastAppVersionKey = @"MTZWhatsNew.lastAppVers
 
 + (NSDictionary *)whatsNewSinceVersion:(NSString *)versionString
 {
+    
+    // versionString :: Currently installed version
+    // self.appVersion :: Current binary app version
+    // version :: Version with changes to be checked
+    
+    NSString *currentAppVersion = self.appVersion;
+    NSArray<NSString *> *currentAppVersionComponents =
+        [currentAppVersion componentsSeparatedByString: @"."];
+    
+    NSArray<NSString *> *previousAppVersionComponents =
+        [versionString componentsSeparatedByString: @"."];
+    
 	NSMutableDictionary *whatsNew = [[NSMutableDictionary alloc] init];
 	NSDictionary *allFeatures = [self allFeatures];
 	for (NSString *version in [allFeatures allKeys]) {
-		if ([version compare:versionString options:NSNumericSearch] == NSOrderedDescending &&
-			[version compare:[self appVersion] options:NSNumericSearch] != NSOrderedDescending)
-		{
+        
+        NSArray<NSString *> *versionComponents =
+            [versionString componentsSeparatedByString: @"."];
+        
+        BOOL featureShouldBeIncluded = !(
+            [versionString isEqualToString:version] ||
+            [currentAppVersion isEqualToString:version]
+        );
+        
+        for (
+             NSUInteger i = 0;
+             i < MAX(
+                     MAX(
+                         currentAppVersionComponents.count,
+                         versionComponents.count
+                     ),
+                     previousAppVersionComponents.count
+             );
+             i++
+        ) {
+            
+            int previousAppVersionComponent = 0;
+            int currentAppVersionComponent = 0;
+            int versionComponent = 0;
+            
+            if (previousAppVersionComponents.count > i) {
+                previousAppVersionComponent =
+                    previousAppVersionComponents[i].intValue;
+            }
+            
+            if (currentAppVersionComponents.count > i) {
+                currentAppVersionComponent =
+                    currentAppVersionComponents[i].intValue;
+            }
+            
+            if (versionComponents.count > i) {
+                versionComponent = versionComponents[i].intValue;
+            }
+            
+            if (
+                previousAppVersionComponent > versionComponent ||
+                currentAppVersionComponent < versionComponent
+            ) {
+                featureShouldBeIncluded = false;
+            }
+            
+        }
+        
+		if (featureShouldBeIncluded) {
 			[whatsNew setObject:allFeatures[version] forKey:version];
 		}
 	}
