@@ -125,7 +125,7 @@ static NSString * const MTZWhatsNewLastAppVersionKey = @"MTZWhatsNew.lastAppVers
 	for (NSString *version in [allFeatures allKeys]) {
         
         NSArray<NSString *> *versionComponents =
-            [versionString componentsSeparatedByString: @"."];
+            [version componentsSeparatedByString: @"."];
         
         BOOL featureShouldBeIncluded = !(
             [versionString isEqualToString:version] ||
